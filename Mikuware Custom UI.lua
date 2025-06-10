@@ -1,17 +1,9 @@
--- custom UI 
--- Mikuware UI System
-local Players = game:GetService("Players")
+-- Mikuware Custom UI
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
-local TeleportService = game:GetService("TeleportService")
 local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
-local TextService = game:GetService("TextService")
-
--- Wait for player
-local LocalPlayer = Players.LocalPlayer
-repeat task.wait() until LocalPlayer:IsDescendantOf(Players)
 
 -- Miku Color Scheme
 local MIKU_TEAL = Color3.fromRGB(57, 197, 187)
@@ -22,8 +14,9 @@ local MIKU_WHITE = Color3.fromRGB(255, 255, 255)
 
 -- Create main GUI container
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "MikuwareUI"
+screenGui.Name = "MikuwareUI_"..HttpService:GenerateGUID(false)
 screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = CoreGui
 
 -- Background Blur Effect
@@ -43,6 +36,7 @@ cmdBar.BorderSizePixel = 0
 cmdBar.Size = UDim2.new(0.4, 0, 0, 60)
 cmdBar.Position = UDim2.new(0.5, 0, 0.1, 0)
 cmdBar.Visible = false
+cmdBar.ZIndex = 5
 cmdBar.Parent = screenGui
 
 -- Miku gradient background
@@ -61,6 +55,7 @@ cmdAccent.Size = UDim2.new(1, 0, 0, 4)
 cmdAccent.Position = UDim2.new(0, 0, 1, -4)
 cmdAccent.BackgroundColor3 = MIKU_PINK
 cmdAccent.BorderSizePixel = 0
+cmdAccent.ZIndex = 6
 cmdAccent.Parent = cmdBar
 
 -- White border
@@ -77,13 +72,14 @@ cmdInput.Size = UDim2.new(0.95, 0, 0.8, 0)
 cmdInput.Position = UDim2.new(0.025, 0, 0.1, 0)
 cmdInput.BackgroundTransparency = 1
 cmdInput.Text = ""
-cmdInput.PlaceholderText = "Enter Mikuware command (help, notify, serverhop, rejoin...)"
+cmdInput.PlaceholderText = "Enter Mikuware command..."
 cmdInput.ClearTextOnFocus = false
 cmdInput.TextColor3 = MIKU_WHITE
 cmdInput.Font = Enum.Font.GothamBold
 cmdInput.TextSize = 18
 cmdInput.TextXAlignment = Enum.TextXAlignment.Left
 cmdInput.TextWrapped = true
+cmdInput.ZIndex = 6
 cmdInput.Parent = cmdBar
 
 -- Text glow effect
@@ -159,30 +155,10 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Command processing
-cmdInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local text = string.lower(cmdInput.Text)
-        local args = {}
-        
-        for arg in text:gmatch("%S+") do
-            table.insert(args, arg)
-        end
-        
-        if #args > 0 then
-            local cmd = args[1]
-            table.remove(args, 1)
-            
-            -- Process commands here
-            -- Example: if cmd == "help" then
-        end
-        
-        cmdInput.Text = ""
-        if isConsoleOpen then
-            cmdInput:CaptureFocus()
-        end
-    end
-end)
+-- Cleanup
+local function Cleanup()
+    blur:Destroy()
+    screenGui:Destroy()
+end
 
--- Initialization message
-print("Mikuware UI System Loaded - Press M to toggle console")
+game:BindToClose(Cleanup)
